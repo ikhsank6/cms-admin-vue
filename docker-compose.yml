@@ -1,0 +1,23 @@
+# Frontend (Admin CMS + Public site) served by nginx.
+# The ElysiaJS API, PostgreSQL, Redis and S3/RustFS/MinIO live in the backend repository;
+# point API_UPSTREAM at it (or join the same docker network as service "api").
+#
+#   docker compose up --build                       # real API at API_UPSTREAM
+#   VITE_API_MOCK=true docker compose up --build    # standalone demo with the in-browser mock API
+services:
+  web:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_API_MOCK: ${VITE_API_MOCK:-false}
+        VITE_SITE_URL: ${VITE_SITE_URL:-http://localhost:8080}
+        VITE_UPLOAD_MAX_MB: ${VITE_UPLOAD_MAX_MB:-10}
+    environment:
+      API_UPSTREAM: ${API_UPSTREAM:-http://host.docker.internal:3000}
+      CLIENT_MAX_BODY_SIZE: 12m
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - '8080:80'
+    restart: unless-stopped
