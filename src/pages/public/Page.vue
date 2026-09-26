@@ -34,7 +34,10 @@ useSeo(() => ({
   <article v-else :data-page="page.slug">
     <header v-if="!hasHero" class="bg-muted/40 border-b">
       <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <h1 class="text-3xl font-bold tracking-tight md:text-5xl" data-testid="page-title">
+        <h1
+          class="font-display text-3xl font-medium tracking-tight md:text-5xl"
+          data-testid="page-title"
+        >
           {{ page.title }}
         </h1>
       </div>

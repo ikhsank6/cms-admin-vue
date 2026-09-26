@@ -107,7 +107,7 @@ async function share() {
       </template>
     </nav>
     <h1
-      class="text-3xl leading-tight font-bold tracking-tight md:text-4xl"
+      class="font-display text-3xl leading-tight font-medium tracking-tight md:text-4xl"
       data-testid="article-title"
     >
       {{ article.title }}

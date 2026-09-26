@@ -6,15 +6,21 @@ defineProps<SectionContentProps>()
 </script>
 
 <template>
-  <SectionShell :title="content.title" muted>
-    <dl class="grid grid-cols-2 gap-6 md:grid-cols-4">
+  <SectionShell :title="content.title" :index="index">
+    <dl
+      class="divide-border border-border grid grid-cols-2 divide-x divide-y border md:grid-cols-4 md:divide-y-0"
+    >
       <div
         v-for="(item, i) in content.items ?? []"
         :key="i"
-        class="bg-background rounded-xl border p-6 text-center"
+        data-reveal-item
+        class="flex flex-col justify-between gap-6 p-6 md:p-8"
+        :style="{ transitionDelay: `${Number(i) * 80}ms` }"
       >
         <dt class="text-muted-foreground text-sm">{{ item.label }}</dt>
-        <dd class="text-brand mt-2 text-3xl font-bold md:text-4xl">{{ item.value }}</dd>
+        <dd class="font-display text-4xl font-medium tracking-tight md:text-5xl">
+          {{ item.value }}
+        </dd>
       </div>
     </dl>
   </SectionShell>

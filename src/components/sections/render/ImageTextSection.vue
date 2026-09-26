@@ -25,7 +25,10 @@ const html = computed(() => renderMarkdown(props.content.body))
         ]"
       />
       <div>
-        <h2 v-if="content.title" class="mb-4 text-2xl font-bold tracking-tight md:text-3xl">
+        <h2
+          v-if="content.title"
+          class="font-display mb-4 text-2xl font-medium tracking-tight md:text-3xl"
+        >
           {{ content.title }}
         </h2>
         <div class="prose-content" v-html="html" />

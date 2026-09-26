@@ -133,18 +133,44 @@
   }
 }
 
+/* Editorial display type — public site headlines only (admin CMS keeps the plain UI font). */
+@utility font-display {
+  font-family: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+}
+
+/* Reveal-on-scroll: fades content in as it enters the viewport (see useRevealOnScroll). */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Typography for rendered rich content (articles/pages) */
 .prose-content {
   @apply leading-relaxed text-foreground/90;
 }
 .prose-content h1 {
-  @apply mt-8 mb-4 text-3xl font-bold;
+  @apply font-display mt-8 mb-4 text-3xl font-medium;
 }
 .prose-content h2 {
-  @apply mt-8 mb-3 text-2xl font-semibold;
+  @apply font-display mt-8 mb-3 text-2xl font-medium;
 }
 .prose-content h3 {
-  @apply mt-6 mb-2 text-xl font-semibold;
+  @apply font-display mt-6 mb-2 text-xl font-medium;
 }
 .prose-content p {
   @apply my-4;

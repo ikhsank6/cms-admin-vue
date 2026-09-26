@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import {
@@ -22,6 +22,15 @@ const route = useRoute()
 const router = useRouter()
 const mobileOpen = ref(false)
 const query = ref('')
+const scrollProgress = ref(0)
+
+function updateScrollProgress() {
+  const max = document.documentElement.scrollHeight - window.innerHeight
+  scrollProgress.value = max > 0 ? Math.min(window.scrollY / max, 1) : 0
+}
+onMounted(() => window.addEventListener('scroll', updateScrollProgress, { passive: true }))
+onUnmounted(() => window.removeEventListener('scroll', updateScrollProgress))
+watch(() => route.fullPath, updateScrollProgress)
 
 onMounted(() => site.load())
 watch(
@@ -81,7 +90,13 @@ function submitSearch() {
       class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-background focus:p-2"
       >Lewati ke konten</a
     >
-    <header class="bg-background/90 sticky top-0 z-40 border-b backdrop-blur">
+    <header class="bg-background/90 sticky top-0 z-40 border-b backdrop-blur relative">
+      <div class="bg-border absolute inset-x-0 top-full h-px overflow-hidden" aria-hidden="true">
+        <div
+          class="bg-brand h-full transition-[width] duration-150 ease-out"
+          :style="{ width: `${scrollProgress * 100}%` }"
+        />
+      </div>
       <div class="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
         <RouterLink to="/" class="flex shrink-0 items-center gap-2 font-bold">
           <img

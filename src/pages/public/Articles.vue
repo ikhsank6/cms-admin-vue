@@ -55,7 +55,7 @@ useSeo(() => ({
   <div>
     <header class="bg-muted/40 border-b">
       <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <h1 class="text-3xl font-bold tracking-tight md:text-5xl">
+        <h1 class="font-display text-3xl font-medium tracking-tight md:text-5xl">
           {{ activeCategory?.name ?? 'Berita' }}
         </h1>
         <p class="text-muted-foreground mt-3">Berita, pengumuman, dan informasi terbaru.</p>

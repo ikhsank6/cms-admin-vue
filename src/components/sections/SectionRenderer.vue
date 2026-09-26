@@ -37,9 +37,17 @@ const components: Record<SectionType, Component> = {
     <component
       :is="components[section.type]"
       v-if="section.isActive !== false && components[section.type]"
+      :id="`section-${i}`"
       :content="section.content"
+      :index="i + 1"
       :data-section="section.type"
-      v-bind="section.type === 'NEWS' ? { articles } : {}"
+      v-bind="
+        section.type === 'NEWS'
+          ? { articles }
+          : section.type === 'HERO'
+            ? { nextId: `section-${i + 1}` }
+            : {}
+      "
     />
   </template>
 </template>
