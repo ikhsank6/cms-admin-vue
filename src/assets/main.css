@@ -28,7 +28,19 @@
   --ring: oklch(0.708 0 0);
   --brand: oklch(0.5 0.17 255);
   --brand-foreground: oklch(0.985 0 0);
-  --sidebar: oklch(0.985 0 0);
+
+  /* Admin shell: navbar + icon rail are always dark navy, in both themes. */
+  --navbar: oklch(0.21 0.045 262);
+  --navbar-foreground: oklch(0.93 0 0);
+  --sidebar: oklch(0.24 0.05 262);
+  --sidebar-foreground: oklch(0.72 0.02 255);
+  --sidebar-active: var(--brand);
+  --sidebar-active-foreground: var(--brand-foreground);
+  --sidebar-hover: oklch(0.32 0.06 260);
+  --sidebar-border: oklch(0.32 0.05 260);
+  /* Active submenu item background in the (light-mode) sidebar panel. */
+  --active-surface: oklch(0.96 0.02 255);
+  --active-surface-foreground: var(--brand);
 }
 
 .dark {
@@ -51,7 +63,18 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --brand: oklch(0.65 0.15 255);
-  --sidebar: oklch(0.18 0 0);
+
+  /* The admin shell keeps the same navy in dark mode; only the active-item tint changes. */
+  --navbar: oklch(0.21 0.045 262);
+  --navbar-foreground: oklch(0.93 0 0);
+  --sidebar: oklch(0.24 0.05 262);
+  --sidebar-foreground: oklch(0.72 0.02 255);
+  --sidebar-active: var(--brand);
+  --sidebar-active-foreground: var(--brand-foreground);
+  --sidebar-hover: oklch(0.32 0.06 260);
+  --sidebar-border: oklch(0.32 0.05 260);
+  --active-surface: oklch(0.3 0.07 258);
+  --active-surface-foreground: oklch(0.82 0.09 255);
 }
 
 @theme inline {
@@ -82,7 +105,16 @@
   --color-ring: var(--ring);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-navbar: var(--navbar);
+  --color-navbar-foreground: var(--navbar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-active-surface: var(--active-surface);
+  --color-active-surface-foreground: var(--active-surface-foreground);
 }
 
 @layer base {

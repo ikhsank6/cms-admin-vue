@@ -24,6 +24,7 @@ test('session survives a reload (refresh token) and logout ends it', async ({ pa
   await expect(page.getByTestId('user-menu')).toBeVisible()
   await page.getByTestId('user-menu').click()
   await page.getByTestId('logout').click()
+  await page.getByTestId('confirm-ok').click()
   await expect(page).toHaveURL(/\/admin\/login/)
   await page.goto('/admin')
   await expect(page).toHaveURL(/\/admin\/login/)
