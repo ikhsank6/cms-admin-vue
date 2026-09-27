@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { z } from 'zod'
-import { Pencil, Plus, Search, Trash2 } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, Plus, Save, Search, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { Avatar } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -210,8 +210,8 @@ async function remove(u: User) {
         >
       </form>
       <template #footer>
-        <Button variant="outline" @click="open = false">Batal</Button>
-        <Button type="submit" form="user-form" :loading="submitting">Simpan</Button>
+        <Button variant="outline" @click="open = false"><ArrowLeft /> Batal</Button>
+        <Button type="submit" form="user-form" :loading="submitting"><Save /> Simpan</Button>
       </template>
     </Dialog>
   </div>

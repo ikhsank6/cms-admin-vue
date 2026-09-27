@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { z } from 'zod'
-import { Pencil, Plus, Save, Trash2 } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, Plus, Save, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -226,8 +226,8 @@ async function removeMenu(m: Menu) {
         /></FormField>
       </form>
       <template #footer>
-        <Button variant="outline" @click="dialogOpen = false">Batal</Button>
-        <Button type="submit" form="menu-form" :loading="submitting">Simpan</Button>
+        <Button variant="outline" @click="dialogOpen = false"><ArrowLeft /> Batal</Button>
+        <Button type="submit" form="menu-form" :loading="submitting"><Save /> Simpan</Button>
       </template>
     </Dialog>
   </div>

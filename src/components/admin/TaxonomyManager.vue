@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { z } from 'zod'
-import { Pencil, Plus, Search, Trash2 } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, Plus, Save, Search, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -189,8 +189,8 @@ async function remove(item: Item) {
         </FormField>
       </form>
       <template #footer>
-        <Button variant="outline" @click="open = false">Batal</Button>
-        <Button type="submit" form="taxonomy-form" :loading="submitting">Simpan</Button>
+        <Button variant="outline" @click="open = false"><ArrowLeft /> Batal</Button>
+        <Button type="submit" form="taxonomy-form" :loading="submitting"><Save /> Simpan</Button>
       </template>
     </Dialog>
   </Card>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { z } from 'zod'
-import { Pencil, Plus, Send, Trash2, Undo2 } from 'lucide-vue-next'
+import { ArrowLeft, Pencil, Plus, Save, Send, Trash2, Undo2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -226,8 +226,8 @@ const period = (b: Banner) =>
         </div>
       </form>
       <template #footer>
-        <Button variant="outline" @click="open = false">Batal</Button>
-        <Button type="submit" form="banner-form" :loading="submitting">Simpan</Button>
+        <Button variant="outline" @click="open = false"><ArrowLeft /> Batal</Button>
+        <Button type="submit" form="banner-form" :loading="submitting"><Save /> Simpan</Button>
       </template>
     </Dialog>
   </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Search } from 'lucide-vue-next'
+import { ArrowLeft, Search } from 'lucide-vue-next'
 import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -92,7 +92,7 @@ function confirm() {
       <DataPagination v-model="page" :meta="meta" />
     </div>
     <template #footer>
-      <Button variant="outline" @click="open = false">Batal</Button>
+      <Button variant="outline" @click="open = false"><ArrowLeft /> Batal</Button>
       <Button :disabled="!selected" data-testid="media-picker-confirm" @click="confirm"
         >Pilih</Button
       >
