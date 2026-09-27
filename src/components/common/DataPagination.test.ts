@@ -9,9 +9,7 @@ describe('DataPagination', () => {
   it('renders numbered page buttons with an ellipsis on both sides for a middle page', () => {
     const wrapper = mount(DataPagination, { props: { meta: bigMeta, modelValue: 10 } })
     const labels = wrapper.findAll('button').map((b) => b.text())
-    expect(labels).toEqual(
-      expect.arrayContaining(['1', '8', '9', '10', '11', '12', '20']),
-    )
+    expect(labels).toEqual(expect.arrayContaining(['1', '8', '9', '10', '11', '12', '20']))
     expect(wrapper.text()).toContain('…')
   })
 
@@ -24,7 +22,9 @@ describe('DataPagination', () => {
   it('marks the current page with aria-current', () => {
     const wrapper = mount(DataPagination, { props: { meta: bigMeta, modelValue: 10 } })
     expect(wrapper.find('button[aria-label="Halaman 10"]').attributes('aria-current')).toBe('page')
-    expect(wrapper.find('button[aria-label="Halaman 11"]').attributes('aria-current')).toBeUndefined()
+    expect(
+      wrapper.find('button[aria-label="Halaman 11"]').attributes('aria-current'),
+    ).toBeUndefined()
   })
 
   it('disables prev/next at the boundaries', () => {
@@ -64,7 +64,18 @@ describe('DataPagination', () => {
   })
 
   it('hides the jump-to-page form when hideJump is set', () => {
-    const wrapper = mount(DataPagination, { props: { meta: bigMeta, modelValue: 10, hideJump: true } })
+    const wrapper = mount(DataPagination, {
+      props: { meta: bigMeta, modelValue: 10, hideJump: true },
+    })
     expect(wrapper.find('form').exists()).toBe(false)
+  })
+
+  it('keeps the jump-to-page form in the footer even with a single page, disabled', () => {
+    const oneMeta: PaginationMeta = { page: 1, perPage: 10, total: 5, totalPages: 1 }
+    const wrapper = mount(DataPagination, { props: { meta: oneMeta, modelValue: 1 } })
+    const form = wrapper.find('form')
+    expect(form.exists()).toBe(true)
+    expect(form.find('input').attributes('disabled')).toBeDefined()
+    expect(form.find('button').attributes('disabled')).toBeDefined()
   })
 })

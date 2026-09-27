@@ -89,28 +89,31 @@ function jump() {
         <ChevronRight />
       </Button>
 
-      <form
-        v-if="!hideJump && meta.totalPages > 1"
-        class="ml-2 flex items-center gap-1.5"
-        @submit.prevent="jump"
-      >
-        <label class="text-muted-foreground hidden items-center gap-1.5 sm:flex">
-          Ke halaman
+      <form v-if="!hideJump" class="ml-2 flex items-center gap-1.5" @submit.prevent="jump">
+        <label class="text-muted-foreground flex items-center gap-1.5">
+          <span class="hidden sm:inline">Ke halaman</span>
           <input
             v-model="jumpValue"
             type="number"
             min="1"
             :max="meta.totalPages"
             placeholder="#"
+            :disabled="meta.totalPages <= 1"
             :class="
               cn(
-                'border-input h-8 w-16 rounded-md border bg-transparent px-2 text-sm shadow-xs outline-none',
+                'border-input h-8 w-16 rounded-md border bg-transparent px-2 text-sm shadow-xs outline-none disabled:opacity-50',
                 'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               )
             "
           />
         </label>
-        <Button type="submit" variant="outline" size="sm" :disabled="!jumpValue">Ke</Button>
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
+          :disabled="!jumpValue || meta.totalPages <= 1"
+          >Ke</Button
+        >
       </form>
     </div>
   </div>
