@@ -7,16 +7,9 @@ import { Card } from '@/components/ui/card'
 import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import PageHeader from '@/components/common/PageHeader.vue'
 import DataPagination from '@/components/common/DataPagination.vue'
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { auditLogService } from '@/services/admin'
 import { useResourceList } from '@/composables/useResourceList'
@@ -59,6 +52,20 @@ const { items, loading, page, meta, filters } = useResourceList(
 )
 const selected = ref<AuditLog | null>(null)
 
+const columns: DataTableColumn[] = [
+  { key: 'createdAt', label: 'Waktu', class: 'text-sm whitespace-nowrap' },
+  { key: 'user', label: 'User' },
+  { key: 'action', label: 'Aksi' },
+  { key: 'resource', label: 'Resource' },
+  {
+    key: 'ipAddress',
+    label: 'IP',
+    hideBelow: 'lg',
+    class: 'text-muted-foreground font-mono text-xs',
+  },
+  { key: 'actions', class: 'w-12' },
+]
+
 const variant = (a: AuditAction) =>
   a === 'DELETE'
     ? 'destructive'
@@ -91,41 +98,24 @@ const variant = (a: AuditAction) =>
         <Input v-model="filters.from" type="date" aria-label="Dari tanggal" />
         <Input v-model="filters.to" type="date" aria-label="Sampai tanggal" />
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Waktu</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Aksi</TableHead>
-            <TableHead>Resource</TableHead>
-            <TableHead class="hidden lg:table-cell">IP</TableHead>
-            <TableHead class="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="l in items" :key="l.id">
-            <TableCell class="text-sm whitespace-nowrap">{{
-              formatDateTime(l.createdAt)
-            }}</TableCell>
-            <TableCell>{{ l.user?.name ?? 'Sistem' }}</TableCell>
-            <TableCell
-              ><Badge :variant="variant(l.action)">{{ l.action }}</Badge></TableCell
-            >
-            <TableCell>
-              <span class="font-medium">{{ l.resourceType }}</span>
-              <span v-if="l.resourceId" class="text-muted-foreground"> #{{ l.resourceId }}</span>
-              <p class="text-muted-foreground text-xs">{{ l.module }}</p>
-            </TableCell>
-            <TableCell class="text-muted-foreground hidden font-mono text-xs lg:table-cell">{{
-              l.ipAddress
-            }}</TableCell>
-            <TableCell
-              ><Button variant="ghost" size="icon-sm" aria-label="Detail" @click="selected = l"
-                ><Eye /></Button
-            ></TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <DataTable :columns="columns" :rows="items" :loading="loading" :row-key="(l) => l.id">
+        <template #cell-createdAt="{ row: l }">{{ formatDateTime(l.createdAt) }}</template>
+        <template #cell-user="{ row: l }">{{ l.user?.name ?? 'Sistem' }}</template>
+        <template #cell-action="{ row: l }"
+          ><Badge :variant="variant(l.action)">{{ l.action }}</Badge></template
+        >
+        <template #cell-resource="{ row: l }">
+          <span class="font-medium">{{ l.resourceType }}</span>
+          <span v-if="l.resourceId" class="text-muted-foreground"> #{{ l.resourceId }}</span>
+          <p class="text-muted-foreground text-xs">{{ l.module }}</p>
+        </template>
+        <template #cell-ipAddress="{ row: l }">{{ l.ipAddress }}</template>
+        <template #cell-actions="{ row: l }">
+          <Button variant="ghost" size="icon-sm" aria-label="Detail" @click="selected = l"
+            ><Eye
+          /></Button>
+        </template>
+      </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada aktivitas" />
       <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
     </Card>

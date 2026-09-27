@@ -12,17 +12,10 @@ import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import PageHeader from '@/components/common/PageHeader.vue'
 import FormField from '@/components/common/FormField.vue'
 import DataPagination from '@/components/common/DataPagination.vue'
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { roleService, userService, type UserInput } from '@/services/admin'
 import { errorMessage } from '@/services/api'
@@ -48,6 +41,14 @@ onMounted(async () => {
     await roleService.list({ perPage: 100 }).catch(() => ({ data: [] as Role[] }))
   ).data
 })
+
+const columns: DataTableColumn[] = [
+  { key: 'user', label: 'User' },
+  { key: 'role', label: 'Role' },
+  { key: 'status', label: 'Status' },
+  { key: 'lastLoginAt', label: 'Login Terakhir', hideBelow: 'md' },
+  { key: 'actions', class: 'w-24 text-right' },
+]
 
 const open = ref(false)
 const editing = ref<User | null>(null)
@@ -122,61 +123,48 @@ async function remove(u: User) {
           <option v-for="r in roles" :key="r.id" :value="String(r.id)">{{ r.name }}</option>
         </NativeSelect>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead class="hidden md:table-cell">Login Terakhir</TableHead>
-            <TableHead class="w-24" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="u in items" :key="u.id">
-            <TableCell>
-              <div class="flex items-center gap-3">
-                <Avatar :name="u.name" :src="u.avatar" />
-                <div>
-                  <p class="font-medium">{{ u.name }}</p>
-                  <p class="text-muted-foreground text-xs">{{ u.email }}</p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell
-              ><div class="flex flex-wrap gap-1">
-                <Badge v-for="r in u.roles" :key="r.id" variant="outline">{{ r.name }}</Badge>
-              </div></TableCell
-            >
-            <TableCell
-              ><Badge :variant="u.isActive ? 'success' : 'secondary'">{{
-                u.isActive ? 'Aktif' : 'Nonaktif'
-              }}</Badge></TableCell
-            >
-            <TableCell class="text-muted-foreground hidden text-sm md:table-cell">{{
-              formatDateTime(u.lastLoginAt)
-            }}</TableCell>
-            <TableCell class="text-right">
-              <Button
-                v-if="auth.can('user.update')"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Edit"
-                @click="openForm(u)"
-                ><Pencil
-              /></Button>
-              <Button
-                v-if="auth.can('user.delete') && u.id !== auth.user?.id"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Hapus"
-                @click="remove(u)"
-                ><Trash2 class="text-destructive"
-              /></Button>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <DataTable :columns="columns" :rows="items" :loading="loading" :row-key="(u) => u.id">
+        <template #cell-user="{ row: u }">
+          <div class="flex items-center gap-3">
+            <Avatar :name="u.name" :src="u.avatar" />
+            <div>
+              <p class="font-medium">{{ u.name }}</p>
+              <p class="text-muted-foreground text-xs">{{ u.email }}</p>
+            </div>
+          </div>
+        </template>
+        <template #cell-role="{ row: u }">
+          <div class="flex flex-wrap gap-1">
+            <Badge v-for="r in u.roles" :key="r.id" variant="outline">{{ r.name }}</Badge>
+          </div>
+        </template>
+        <template #cell-status="{ row: u }">
+          <Badge :variant="u.isActive ? 'success' : 'secondary'">{{
+            u.isActive ? 'Aktif' : 'Nonaktif'
+          }}</Badge>
+        </template>
+        <template #cell-lastLoginAt="{ row: u }">
+          <span class="text-muted-foreground text-sm">{{ formatDateTime(u.lastLoginAt) }}</span>
+        </template>
+        <template #cell-actions="{ row: u }">
+          <Button
+            v-if="auth.can('user.update')"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Edit"
+            @click="openForm(u)"
+            ><Pencil
+          /></Button>
+          <Button
+            v-if="auth.can('user.delete') && u.id !== auth.user?.id"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Hapus"
+            @click="remove(u)"
+            ><Trash2 class="text-destructive"
+          /></Button>
+        </template>
+      </DataTable>
       <EmptyState v-if="!loading && !items.length" title="User tidak ditemukan" />
       <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
     </Card>

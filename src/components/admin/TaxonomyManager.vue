@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { z } from 'zod'
 import { Pencil, Plus, Search, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
@@ -8,16 +8,9 @@ import { Card } from '@/components/ui/card'
 import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import FormField from '@/components/common/FormField.vue'
 import DataPagination from '@/components/common/DataPagination.vue'
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { useResourceList } from '@/composables/useResourceList'
 import { useConfirm } from '@/composables/useConfirm'
@@ -55,6 +48,23 @@ const { items, loading, page, meta, filters, reload } = useResourceList(
   { search: '' },
 )
 const { errors, submitting, validate, submit } = useFormSubmit()
+
+const columns = computed<DataTableColumn[]>(() => [
+  { key: 'name', label: 'Nama', class: 'font-medium' },
+  { key: 'slug', label: 'Slug', class: 'text-muted-foreground font-mono text-xs' },
+  ...(props.withDescription
+    ? [
+        {
+          key: 'description',
+          label: 'Deskripsi',
+          hideBelow: 'md' as const,
+          class: 'text-muted-foreground max-w-xs truncate',
+        },
+      ]
+    : []),
+  { key: 'articlesCount', label: 'Artikel', class: 'text-right tabular-nums' },
+  { key: 'actions', class: 'w-24 text-right' },
+])
 
 const open = ref(false)
 const editing = ref<Item | null>(null)
@@ -135,47 +145,27 @@ async function remove(item: Item) {
         ><Plus /> Tambah {{ label }}</Button
       >
     </div>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nama</TableHead>
-          <TableHead>Slug</TableHead>
-          <TableHead v-if="withDescription" class="hidden md:table-cell">Deskripsi</TableHead>
-          <TableHead class="text-right">Artikel</TableHead>
-          <TableHead class="w-24" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow v-for="item in items" :key="item.id">
-          <TableCell class="font-medium">{{ item.name }}</TableCell>
-          <TableCell class="text-muted-foreground font-mono text-xs">{{ item.slug }}</TableCell>
-          <TableCell
-            v-if="withDescription"
-            class="text-muted-foreground hidden max-w-xs truncate md:table-cell"
-            >{{ item.description }}</TableCell
-          >
-          <TableCell class="text-right tabular-nums">{{ item.articlesCount ?? 0 }}</TableCell>
-          <TableCell class="text-right">
-            <Button
-              v-if="auth.can(`${permission}.update`)"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Edit"
-              @click="openForm(item)"
-              ><Pencil
-            /></Button>
-            <Button
-              v-if="auth.can(`${permission}.delete`)"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Hapus"
-              @click="remove(item)"
-              ><Trash2 class="text-destructive"
-            /></Button>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <DataTable :columns="columns" :rows="items" :loading="loading" :row-key="(item) => item.id">
+      <template #cell-articlesCount="{ row: item }">{{ item.articlesCount ?? 0 }}</template>
+      <template #cell-actions="{ row: item }">
+        <Button
+          v-if="auth.can(`${permission}.update`)"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Edit"
+          @click="openForm(item)"
+          ><Pencil
+        /></Button>
+        <Button
+          v-if="auth.can(`${permission}.delete`)"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Hapus"
+          @click="remove(item)"
+          ><Trash2 class="text-destructive"
+        /></Button>
+      </template>
+    </DataTable>
     <EmptyState v-if="!loading && !items.length" :title="`Belum ada ${label.toLowerCase()}`" />
     <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
 

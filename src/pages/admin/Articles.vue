@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import {
   ExternalLink,
   MoreHorizontal,
@@ -15,15 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Combobox } from '@/components/ui/combobox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +26,7 @@ import {
 import PageHeader from '@/components/common/PageHeader.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import DataPagination from '@/components/common/DataPagination.vue'
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { articleService, categoryService } from '@/services/admin'
 import { errorMessage } from '@/services/api'
@@ -61,6 +54,29 @@ onMounted(async () => {
       await categoryService.list({ perPage: 100 }).catch(() => ({ data: [] }))
     ).data
 })
+
+// The combobox reserves an empty string for "nothing selected", so the "all categories"
+// entry needs its own sentinel value rather than ''.
+const ALL_CATEGORIES = '__all__'
+const categoryOptions = computed(() => [
+  { label: 'Semua kategori', value: ALL_CATEGORIES },
+  ...categories.value.map((c) => ({ label: c.name, value: c.id })),
+])
+const categoryFilter = computed<string | number | null>({
+  get: () => filters.categoryId || ALL_CATEGORIES,
+  set: (v) => {
+    filters.categoryId = v == null || v === ALL_CATEGORIES ? '' : String(v)
+  },
+})
+
+const columns: DataTableColumn[] = [
+  { key: 'title', label: 'Judul' },
+  { key: 'category', label: 'Kategori', hideBelow: 'md' },
+  { key: 'status', label: 'Status' },
+  { key: 'author', label: 'Penulis', hideBelow: 'lg' },
+  { key: 'publishedAt', label: 'Publikasi', hideBelow: 'md' },
+  { key: 'actions', class: 'w-12' },
+]
 
 async function togglePublish(a: Article) {
   try {
@@ -106,10 +122,13 @@ async function remove(a: Article) {
           <Search class="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input v-model="filters.search" placeholder="Cari artikel…" class="pl-9" />
         </div>
-        <NativeSelect v-model="filters.categoryId" class="sm:w-44">
-          <option value="">Semua kategori</option>
-          <option v-for="c in categories" :key="c.id" :value="String(c.id)">{{ c.name }}</option>
-        </NativeSelect>
+        <Combobox
+          v-model="categoryFilter"
+          :options="categoryOptions"
+          placeholder="Semua kategori"
+          :clearable="false"
+          class="sm:w-48"
+        />
         <NativeSelect v-model="filters.status" class="sm:w-40">
           <option value="">Semua status</option>
           <option value="PUBLISHED">Published</option>
@@ -117,80 +136,59 @@ async function remove(a: Article) {
           <option value="ARCHIVED">Archived</option>
         </NativeSelect>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Judul</TableHead>
-            <TableHead class="hidden md:table-cell">Kategori</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead class="hidden lg:table-cell">Penulis</TableHead>
-            <TableHead class="hidden md:table-cell">Publikasi</TableHead>
-            <TableHead class="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="loading && !items.length">
-            <TableRow v-for="i in 5" :key="i"
-              ><TableCell colspan="6"><Skeleton class="h-6" /></TableCell
-            ></TableRow>
-          </template>
-          <TableRow v-for="a in items" :key="a.id">
-            <TableCell class="max-w-md">
-              <div class="flex items-center gap-3">
-                <img
-                  v-if="a.featuredImage"
-                  :src="a.featuredImage"
-                  alt=""
-                  class="hidden size-10 shrink-0 rounded object-cover sm:block"
-                />
-                <div class="min-w-0">
-                  <RouterLink
-                    :to="`/admin/articles/${a.id}`"
-                    class="line-clamp-1 font-medium hover:underline"
-                    >{{ a.title }}</RouterLink
-                  >
-                  <p class="text-muted-foreground truncate font-mono text-xs">/news/{{ a.slug }}</p>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell class="hidden md:table-cell">{{ a.category?.name ?? '—' }}</TableCell>
-            <TableCell><StatusBadge :status="a.status" /></TableCell>
-            <TableCell class="hidden lg:table-cell">{{ a.author?.name ?? '—' }}</TableCell>
-            <TableCell class="text-muted-foreground hidden text-sm md:table-cell">{{
-              formatDate(a.publishedAt)
-            }}</TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" size="icon-sm" aria-label="Aksi"
-                    ><MoreHorizontal
-                  /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem @select="$router.push(`/admin/articles/${a.id}`)"
-                    ><Pencil /> Edit</DropdownMenuItem
-                  >
-                  <DropdownMenuItem v-if="a.status === 'PUBLISHED'" as-child>
-                    <a :href="`/news/${a.slug}`" target="_blank" rel="noopener"
-                      ><ExternalLink /> Lihat</a
-                    >
-                  </DropdownMenuItem>
-                  <DropdownMenuItem v-if="auth.can('article.publish')" @select="togglePublish(a)">
-                    <template v-if="a.status === 'PUBLISHED'"><Undo2 /> Unpublish</template>
-                    <template v-else><Send /> Publish</template>
-                  </DropdownMenuItem>
-                  <template v-if="auth.can('article.delete')">
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" @select="remove(a)"
-                      ><Trash2 /> Hapus</DropdownMenuItem
-                    >
-                  </template>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <DataTable :columns="columns" :rows="items" :loading="loading" :row-key="(a) => a.id">
+        <template #cell-title="{ row: a }">
+          <div class="flex max-w-md items-center gap-3">
+            <img
+              v-if="a.featuredImage"
+              :src="a.featuredImage"
+              alt=""
+              class="hidden size-10 shrink-0 rounded object-cover sm:block"
+            />
+            <div class="min-w-0">
+              <RouterLink
+                :to="`/admin/articles/${a.id}`"
+                class="line-clamp-1 font-medium hover:underline"
+                >{{ a.title }}</RouterLink
+              >
+              <p class="text-muted-foreground truncate font-mono text-xs">/news/{{ a.slug }}</p>
+            </div>
+          </div>
+        </template>
+        <template #cell-category="{ row: a }">{{ a.category?.name ?? '—' }}</template>
+        <template #cell-status="{ row: a }"><StatusBadge :status="a.status" /></template>
+        <template #cell-author="{ row: a }">{{ a.author?.name ?? '—' }}</template>
+        <template #cell-publishedAt="{ row: a }">
+          <span class="text-muted-foreground text-sm">{{ formatDate(a.publishedAt) }}</span>
+        </template>
+        <template #cell-actions="{ row: a }">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="icon-sm" aria-label="Aksi"><MoreHorizontal /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem @select="$router.push(`/admin/articles/${a.id}`)"
+                ><Pencil /> Edit</DropdownMenuItem
+              >
+              <DropdownMenuItem v-if="a.status === 'PUBLISHED'" as-child>
+                <a :href="`/news/${a.slug}`" target="_blank" rel="noopener"
+                  ><ExternalLink /> Lihat</a
+                >
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="auth.can('article.publish')" @select="togglePublish(a)">
+                <template v-if="a.status === 'PUBLISHED'"><Undo2 /> Unpublish</template>
+                <template v-else><Send /> Publish</template>
+              </DropdownMenuItem>
+              <template v-if="auth.can('article.delete')">
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" @select="remove(a)"
+                  ><Trash2 /> Hapus</DropdownMenuItem
+                >
+              </template>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
+      </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada artikel" />
       <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
     </Card>

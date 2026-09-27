@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ArrowDown, ArrowUp, CornerDownRight, Plus, Trash2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { Switch } from '@/components/ui/switch'
 import type { MenuItem } from '@/types'
 
@@ -49,6 +51,12 @@ function onLinkPick(item: MenuItem, value: string) {
   }
 }
 const pageUrl = (slug: string) => (slug === 'home' ? '/' : `/${slug}`)
+const pageOptions = computed(() =>
+  props.pages.map((p) => ({ label: p.title, value: pageUrl(p.slug) })),
+)
+const articleOptions = computed(() =>
+  props.articles.map((a) => ({ label: a.title, value: `/news/${a.slug}` })),
+)
 </script>
 
 <template>
@@ -62,26 +70,22 @@ const pageUrl = (slug: string) => (slug === 'home' ? '/' : `/${slug}`)
             <option value="PAGE">Page</option>
             <option value="ARTICLE">Artikel</option>
           </NativeSelect>
-          <NativeSelect
+          <Combobox
             v-if="item.linkType === 'PAGE'"
             :model-value="item.url"
+            :options="pageOptions"
             aria-label="Page"
-            @update:model-value="onLinkPick(item, String($event))"
-          >
-            <option value="">— Pilih page —</option>
-            <option v-for="p in pages" :key="p.slug" :value="pageUrl(p.slug)">{{ p.title }}</option>
-          </NativeSelect>
-          <NativeSelect
+            placeholder="— Pilih page —"
+            @update:model-value="onLinkPick(item, String($event ?? ''))"
+          />
+          <Combobox
             v-else-if="item.linkType === 'ARTICLE'"
             :model-value="item.url"
+            :options="articleOptions"
             aria-label="Artikel"
-            @update:model-value="onLinkPick(item, String($event))"
-          >
-            <option value="">— Pilih artikel —</option>
-            <option v-for="a in articles" :key="a.slug" :value="`/news/${a.slug}`">
-              {{ a.title }}
-            </option>
-          </NativeSelect>
+            placeholder="— Pilih artikel —"
+            @update:model-value="onLinkPick(item, String($event ?? ''))"
+          />
           <Input v-else v-model="item.url" placeholder="/path atau https://…" aria-label="URL" />
           <NativeSelect v-model="item.target" aria-label="Target">
             <option value="_self">_self</option>

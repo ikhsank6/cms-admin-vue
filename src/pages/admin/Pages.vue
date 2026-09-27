@@ -14,15 +14,6 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +24,7 @@ import {
 import PageHeader from '@/components/common/PageHeader.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import DataPagination from '@/components/common/DataPagination.vue'
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { pageService } from '@/services/admin'
 import { errorMessage } from '@/services/api'
@@ -53,6 +45,14 @@ const { items, loading, page, meta, filters, reload } = useResourceList(
 )
 
 const publicPath = (p: Page) => (p.slug === 'home' ? '/' : `/${p.slug}`)
+
+const columns: DataTableColumn[] = [
+  { key: 'title', label: 'Judul' },
+  { key: 'status', label: 'Status' },
+  { key: 'sections', label: 'Sections', hideBelow: 'md' },
+  { key: 'updatedAt', label: 'Diperbarui', hideBelow: 'md' },
+  { key: 'actions', class: 'w-12' },
+]
 
 async function togglePublish(p: Page) {
   try {
@@ -105,66 +105,50 @@ async function remove(p: Page) {
           <option value="ARCHIVED">Archived</option>
         </NativeSelect>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Judul</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead class="hidden md:table-cell">Sections</TableHead>
-            <TableHead class="hidden md:table-cell">Diperbarui</TableHead>
-            <TableHead class="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="loading && !items.length">
-            <TableRow v-for="i in 5" :key="i"
-              ><TableCell colspan="5"><Skeleton class="h-6" /></TableCell
-            ></TableRow>
-          </template>
-          <TableRow v-for="p in items" :key="p.id" data-testid="page-row">
-            <TableCell>
-              <RouterLink :to="`/admin/pages/${p.id}`" class="font-medium hover:underline">{{
-                p.title
-              }}</RouterLink>
-              <p class="text-muted-foreground font-mono text-xs">{{ publicPath(p) }}</p>
-            </TableCell>
-            <TableCell><StatusBadge :status="p.status" /></TableCell>
-            <TableCell class="hidden md:table-cell">{{ p.sections.length }}</TableCell>
-            <TableCell class="text-muted-foreground hidden text-sm md:table-cell">{{
-              formatDateTime(p.updatedAt)
-            }}</TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost" size="icon-sm" aria-label="Aksi"
-                    ><MoreHorizontal
-                  /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem @select="$router.push(`/admin/pages/${p.id}`)"
-                    ><Pencil /> Edit</DropdownMenuItem
-                  >
-                  <DropdownMenuItem v-if="p.status === 'PUBLISHED'" as-child>
-                    <a :href="publicPath(p)" target="_blank" rel="noopener"
-                      ><ExternalLink /> Lihat</a
-                    >
-                  </DropdownMenuItem>
-                  <DropdownMenuItem v-if="auth.can('page.publish')" @select="togglePublish(p)">
-                    <template v-if="p.status === 'PUBLISHED'"><Undo2 /> Unpublish</template>
-                    <template v-else><Send /> Publish</template>
-                  </DropdownMenuItem>
-                  <template v-if="auth.can('page.delete')">
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" @select="remove(p)"
-                      ><Trash2 /> Hapus</DropdownMenuItem
-                    >
-                  </template>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <DataTable
+        :columns="columns"
+        :rows="items"
+        :loading="loading"
+        test-id="page-row"
+        :row-key="(p) => p.id"
+      >
+        <template #cell-title="{ row: p }">
+          <RouterLink :to="`/admin/pages/${p.id}`" class="font-medium hover:underline">{{
+            p.title
+          }}</RouterLink>
+          <p class="text-muted-foreground font-mono text-xs">{{ publicPath(p) }}</p>
+        </template>
+        <template #cell-status="{ row: p }"><StatusBadge :status="p.status" /></template>
+        <template #cell-sections="{ row: p }">{{ p.sections.length }}</template>
+        <template #cell-updatedAt="{ row: p }">
+          <span class="text-muted-foreground text-sm">{{ formatDateTime(p.updatedAt) }}</span>
+        </template>
+        <template #cell-actions="{ row: p }">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="icon-sm" aria-label="Aksi"><MoreHorizontal /></Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem @select="$router.push(`/admin/pages/${p.id}`)"
+                ><Pencil /> Edit</DropdownMenuItem
+              >
+              <DropdownMenuItem v-if="p.status === 'PUBLISHED'" as-child>
+                <a :href="publicPath(p)" target="_blank" rel="noopener"><ExternalLink /> Lihat</a>
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="auth.can('page.publish')" @select="togglePublish(p)">
+                <template v-if="p.status === 'PUBLISHED'"><Undo2 /> Unpublish</template>
+                <template v-else><Send /> Publish</template>
+              </DropdownMenuItem>
+              <template v-if="auth.can('page.delete')">
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" @select="remove(p)"
+                  ><Trash2 /> Hapus</DropdownMenuItem
+                >
+              </template>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </template>
+      </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada page" />
       <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
     </Card>

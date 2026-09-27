@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -61,10 +62,9 @@ const publishedAtLocal = computed({
   get: () => toDateTimeLocal(form.publishedAt),
   set: (v: string) => (form.publishedAt = fromDateTimeLocal(v)),
 })
-const categoryValue = computed({
-  get: () => (form.categoryId ? String(form.categoryId) : ''),
-  set: (v: string) => (form.categoryId = v ? Number(v) : null),
-})
+const categoryOptions = computed(() =>
+  categories.value.map((c) => ({ label: c.name, value: c.id })),
+)
 
 watch(
   () => form.title,
@@ -265,12 +265,12 @@ async function save(status?: ContentStatus) {
           <CardHeader><CardTitle class="text-base">Kategori & Tag</CardTitle></CardHeader>
           <CardContent class="grid gap-4">
             <FormField label="Kategori" for="category">
-              <NativeSelect id="category" v-model="categoryValue">
-                <option value="">— Tanpa kategori —</option>
-                <option v-for="c in categories" :key="c.id" :value="String(c.id)">
-                  {{ c.name }}
-                </option>
-              </NativeSelect>
+              <Combobox
+                id="category"
+                v-model="form.categoryId"
+                :options="categoryOptions"
+                placeholder="— Tanpa kategori —"
+              />
             </FormField>
             <div class="grid gap-2">
               <span class="text-sm font-medium">Tag</span>
