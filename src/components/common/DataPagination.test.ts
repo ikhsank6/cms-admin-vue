@@ -70,12 +70,16 @@ describe('DataPagination', () => {
     expect(wrapper.find('form').exists()).toBe(false)
   })
 
-  it('keeps the jump-to-page form in the footer even with a single page, disabled', () => {
-    const oneMeta: PaginationMeta = { page: 1, perPage: 10, total: 5, totalPages: 1 }
-    const wrapper = mount(DataPagination, { props: { meta: oneMeta, modelValue: 1 } })
-    const form = wrapper.find('form')
-    expect(form.exists()).toBe(true)
-    expect(form.find('input').attributes('disabled')).toBeDefined()
-    expect(form.find('button').attributes('disabled')).toBeDefined()
+  it('hides the jump-to-page form when every page already has its own button', () => {
+    // 7 pages fit entirely in the numbered row (no ellipsis) — a jump input would just
+    // duplicate what clicking a page button already does.
+    const small: PaginationMeta = { page: 4, perPage: 10, total: 70, totalPages: 7 }
+    const wrapper = mount(DataPagination, { props: { meta: small, modelValue: 4 } })
+    expect(wrapper.find('form').exists()).toBe(false)
+  })
+
+  it('shows the jump-to-page form once the numbered row collapses behind an ellipsis', () => {
+    const wrapper = mount(DataPagination, { props: { meta: bigMeta, modelValue: 10 } })
+    expect(wrapper.find('form').exists()).toBe(true)
   })
 })

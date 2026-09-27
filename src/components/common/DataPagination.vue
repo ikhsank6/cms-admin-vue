@@ -28,6 +28,9 @@ const range = computed(() => {
 })
 
 const pages = computed(() => paginationRange(props.meta.page, props.meta.totalPages))
+// Jump-to-page only earns its place once the numbered buttons stop covering every page
+// directly (i.e. there's an ellipsis) — otherwise it just duplicates what a page button does.
+const canJump = computed(() => pages.value.includes('ellipsis'))
 
 const jumpValue = ref('')
 function jump() {
@@ -89,7 +92,11 @@ function jump() {
         <ChevronRight />
       </Button>
 
-      <form v-if="!hideJump" class="ml-2 flex items-center gap-1.5" @submit.prevent="jump">
+      <form
+        v-if="!hideJump && canJump"
+        class="ml-2 flex items-center gap-1.5"
+        @submit.prevent="jump"
+      >
         <label class="text-muted-foreground flex items-center gap-1.5">
           <span class="hidden sm:inline">Ke halaman</span>
           <input
@@ -98,22 +105,15 @@ function jump() {
             min="1"
             :max="meta.totalPages"
             placeholder="#"
-            :disabled="meta.totalPages <= 1"
             :class="
               cn(
-                'border-input h-8 w-16 rounded-md border bg-transparent px-2 text-sm shadow-xs outline-none disabled:opacity-50',
+                'border-input h-8 w-16 rounded-md border bg-transparent px-2 text-sm shadow-xs outline-none',
                 'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               )
             "
           />
         </label>
-        <Button
-          type="submit"
-          variant="outline"
-          size="sm"
-          :disabled="!jumpValue || meta.totalPages <= 1"
-          >Ke</Button
-        >
+        <Button type="submit" variant="outline" size="sm" :disabled="!jumpValue">Ke</Button>
       </form>
     </div>
   </div>
