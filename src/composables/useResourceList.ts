@@ -17,9 +17,10 @@ export function useResourceList<T, F extends Record<string, string | number | un
   const loading = ref(false)
   const error = ref<string | null>(null)
   const page = ref(1)
+  const perPage = ref(options.perPage ?? 10)
   const meta = ref<PaginationMeta>({
     page: 1,
-    perPage: options.perPage ?? 10,
+    perPage: perPage.value,
     total: 0,
     totalPages: 1,
   })
@@ -31,7 +32,7 @@ export function useResourceList<T, F extends Record<string, string | number | un
     loading.value = true
     error.value = null
     try {
-      const res = await fetcher({ page: page.value, perPage: meta.value.perPage, ...filters })
+      const res = await fetcher({ page: page.value, perPage: perPage.value, ...filters })
       if (id !== requestId) return
       items.value = res.data
       meta.value = res.meta
@@ -47,6 +48,10 @@ export function useResourceList<T, F extends Record<string, string | number | un
   const { search: _search, ...rest } = filters as Record<string, unknown>
   void _search
   watch(page, load)
+  watch(perPage, () => {
+    if (page.value !== 1) page.value = 1
+    else load()
+  })
   watch(
     () =>
       JSON.stringify(
@@ -72,5 +77,5 @@ export function useResourceList<T, F extends Record<string, string | number | un
 
   if (options.immediate !== false) load()
 
-  return { items, loading, error, page, meta, filters, reload: load }
+  return { items, loading, error, page, perPage, meta, filters, reload: load }
 }

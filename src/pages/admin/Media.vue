@@ -25,7 +25,7 @@ import type { Media } from '@/types'
 
 const auth = useAuthStore()
 const { confirm } = useConfirm()
-const { items, loading, page, meta, filters, reload } = useResourceList(
+const { items, loading, page, perPage, meta, filters, reload } = useResourceList(
   (p) => mediaService.list(p),
   { search: '', type: '', from: '', to: '' },
   { perPage: 24 },
@@ -124,7 +124,14 @@ async function remove(m: Media) {
           </button>
         </div>
       </div>
-      <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
+      <div class="border-t px-4">
+        <DataPagination
+          v-model="page"
+          v-model:page-size="perPage"
+          :meta="meta"
+          :page-size-options="[12, 24, 48, 96]"
+        />
+      </div>
     </Card>
 
     <Dialog

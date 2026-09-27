@@ -36,7 +36,7 @@ import type { Page } from '@/types'
 
 const auth = useAuthStore()
 const { confirm } = useConfirm()
-const { items, loading, page, meta, filters, reload } = useResourceList(
+const { items, loading, page, perPage, meta, filters, reload } = useResourceList(
   (p) => pageService.list(p),
   {
     search: '',
@@ -150,7 +150,14 @@ async function remove(p: Page) {
         </template>
       </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada page" />
-      <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
+      <div class="border-t px-4">
+        <DataPagination
+          v-model="page"
+          v-model:page-size="perPage"
+          :meta="meta"
+          :page-size-options="[10, 20, 50, 100]"
+        />
+      </div>
     </Card>
   </div>
 </template>

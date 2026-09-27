@@ -30,7 +30,7 @@ import type { Role, User } from '@/types'
 const auth = useAuthStore()
 const { confirm } = useConfirm()
 const roles = ref<Role[]>([])
-const { items, loading, page, meta, filters, reload } = useResourceList(
+const { items, loading, page, perPage, meta, filters, reload } = useResourceList(
   (p) => userService.list(p),
   { search: '', role: '' },
 )
@@ -166,7 +166,14 @@ async function remove(u: User) {
         </template>
       </DataTable>
       <EmptyState v-if="!loading && !items.length" title="User tidak ditemukan" />
-      <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
+      <div class="border-t px-4">
+        <DataPagination
+          v-model="page"
+          v-model:page-size="perPage"
+          :meta="meta"
+          :page-size-options="[10, 20, 50, 100]"
+        />
+      </div>
     </Card>
 
     <Dialog v-model:open="open" :title="editing ? 'Edit User' : 'Tambah User'">

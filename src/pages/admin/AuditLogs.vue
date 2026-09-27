@@ -39,7 +39,7 @@ const modules = [
   'users',
   'roles',
 ]
-const { items, loading, page, meta, filters } = useResourceList(
+const { items, loading, page, perPage, meta, filters } = useResourceList(
   (p) => auditLogService.list(p),
   {
     search: '',
@@ -117,7 +117,14 @@ const variant = (a: AuditAction) =>
         </template>
       </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada aktivitas" />
-      <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
+      <div class="border-t px-4">
+        <DataPagination
+          v-model="page"
+          v-model:page-size="perPage"
+          :meta="meta"
+          :page-size-options="[10, 20, 50, 100]"
+        />
+      </div>
     </Card>
 
     <Dialog

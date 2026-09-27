@@ -39,7 +39,7 @@ import type { Article, Category } from '@/types'
 const auth = useAuthStore()
 const { confirm } = useConfirm()
 const categories = ref<Category[]>([])
-const { items, loading, page, meta, filters, reload } = useResourceList(
+const { items, loading, page, perPage, meta, filters, reload } = useResourceList(
   (p) => articleService.list(p),
   {
     search: '',
@@ -190,7 +190,14 @@ async function remove(a: Article) {
         </template>
       </DataTable>
       <EmptyState v-if="!loading && !items.length" title="Belum ada artikel" />
-      <div class="border-t px-4"><DataPagination v-model="page" :meta="meta" /></div>
+      <div class="border-t px-4">
+        <DataPagination
+          v-model="page"
+          v-model:page-size="perPage"
+          :meta="meta"
+          :page-size-options="[10, 20, 50, 100]"
+        />
+      </div>
     </Card>
   </div>
 </template>
